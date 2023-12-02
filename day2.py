@@ -23,6 +23,7 @@ def get_games(lines):
             blue = int(b.group(1)) if b else 0
             to_be_added.append((red,green,blue))
         games[game_no] = to_be_added
+    return games
 
 def part1(lines):
     games = get_games(lines)

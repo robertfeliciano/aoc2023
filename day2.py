@@ -4,9 +4,7 @@ import re
 with open('input.txt', 'r') as file:
     lines = [line.strip() for line in file.readlines()]
 
-RED=12
-GREEN=13
-BLUE=14
+RED=12; GREEN=13; BLUE=14
 
 def get_games(lines):
     games = {}

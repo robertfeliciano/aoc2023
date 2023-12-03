@@ -27,7 +27,7 @@ def part2(lines):
     games = get_games(lines)
 
     get_color = lambda idx, pulls : list(map(lambda e: e[idx], pulls ))
-    multiply = lambda l: reduce(lambda x, y: x*y, l)
+    multiply = lambda lst: reduce(lambda x, y: x*y, lst)
     power_set = [multiply([max(get_color(c, game)) for c in range(0,3)]) for _, game in games.items()]
 
     print(sum(power_set))

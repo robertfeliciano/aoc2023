@@ -1,6 +1,6 @@
 use regex::{Error, Regex};
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     fs
 };
 
@@ -13,7 +13,54 @@ fn get_schematic(input: &str) -> Vec<String> {
     return trimmed_lines;
 }
 
-fn part1(schematic: Vec<String>) -> Result<u32, Error> {
+fn part2(schematic: &Vec<String>) -> Result<u32, Error> {
+    let num = Regex::new(r"\d+")?;
+    let sym = Regex::new(r"[^\d\.]")?;
+
+    let mut num_pos: HashMap<(i16, i16), u32> = HashMap::new();
+
+    let mut sym_pos: HashMap<(i16, i16), String> = HashMap::new();
+
+    for (row, line) in schematic.iter().enumerate() {
+        let numbers = num.find_iter(&line);
+        let symbols = sym.find_iter(&line);
+
+        for mat in numbers {
+            let start = mat.start() as i16;
+            let end = mat.end() as i16;
+            let n = mat.as_str().parse::<u32>().unwrap();
+            // need to store the number for its whole span so the dy/dx below works
+            for col in start..end {
+                num_pos.insert((row as i16, col), n);
+            }
+        }
+
+        // println!("{:?}", symbols.collect::<Vec<_>>());
+
+        for mat in symbols {
+            let col = mat.start() as i16;
+            let s = mat.as_str().to_string();
+            sym_pos.insert((row as i16, col), s);
+        }
+    }
+
+    let mut sum: u32 = 0;
+
+    for ((row, col), symbol) in sym_pos.iter() {
+        if symbol != "*" { continue }
+        let mut adj_set: HashSet<&u32> = HashSet::new();
+        let directions = vec![(0,1),(1,0),(1,1),(1,-1),(-1,1),(-1,0),(0,-1),(-1,-1),(0,0)]; 
+        for (dy, dx) in directions {
+            if let Some(n) = num_pos.get(&(row+dy, col+dx)) { let _ = adj_set.insert(n); }
+        }
+        if adj_set.len() != 2 { continue }
+        sum += adj_set.iter().fold(1, |acc, &y| (acc*y) as u32 );
+    }
+
+    Ok(sum)
+}
+
+fn part1(schematic: &Vec<String>) -> Result<u32, Error> {
     let num = Regex::new(r"\d+")?;
     let sym = Regex::new(r"[^\d\.]")?;
 
@@ -47,6 +94,7 @@ fn part1(schematic: Vec<String>) -> Result<u32, Error> {
                 if let Some(_) = sym_pos.get(&(row, col)) { 
                     // if there is a symbol directly above/below or diagonally adjacent to number
                     sum += *num;
+                    break;
                 }
             }
         }
@@ -57,6 +105,8 @@ fn part1(schematic: Vec<String>) -> Result<u32, Error> {
 
 fn main() {
     let schematic = get_schematic("src/input.txt");
-    let s = part1(schematic).unwrap();
+    let s = part1(&schematic).unwrap();
     println!("{}", s);
+    let s2 = part2(&schematic).unwrap();
+    println!("{}", s2);
 }

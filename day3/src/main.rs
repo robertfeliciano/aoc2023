@@ -1,7 +1,7 @@
 use regex::{Error, Regex};
 use std::{
     collections::{HashMap, HashSet},
-    fs
+    fs,
 };
 
 fn get_schematic(input: &str) -> Vec<String> {
@@ -35,8 +35,6 @@ fn part2(schematic: &Vec<String>) -> Result<u32, Error> {
             }
         }
 
-        // println!("{:?}", symbols.collect::<Vec<_>>());
-
         for mat in symbols {
             let col = mat.start() as i16;
             let s = mat.as_str().to_string();
@@ -47,14 +45,30 @@ fn part2(schematic: &Vec<String>) -> Result<u32, Error> {
     let mut sum: u32 = 0;
 
     for ((row, col), symbol) in sym_pos.iter() {
-        if symbol != "*" { continue }
-        let mut adj_set: HashSet<&u32> = HashSet::new();
-        let directions = vec![(0,1),(1,0),(1,1),(1,-1),(-1,1),(-1,0),(0,-1),(-1,-1),(0,0)]; 
-        for (dy, dx) in directions {
-            if let Some(n) = num_pos.get(&(row+dy, col+dx)) { let _ = adj_set.insert(n); }
+        if symbol != "*" {
+            continue;
         }
-        if adj_set.len() != 2 { continue }
-        sum += adj_set.iter().fold(1, |acc, &y| (acc*y) as u32 );
+        let mut adj_set: HashSet<&u32> = HashSet::new();
+        let directions = vec![
+            (0, 1),
+            (1, 0),
+            (0, 0),
+            (1, 1),
+            (1, -1),
+            (-1, 1),
+            (-1, 0),
+            (0, -1),
+            (-1, -1),
+        ];
+        for (dy, dx) in directions {
+            if let Some(n) = num_pos.get(&(row + dy, col + dx)) {
+                let _ = adj_set.insert(n);
+            }
+        }
+        if adj_set.len() != 2 {
+            continue;
+        }
+        sum += adj_set.iter().fold(1, |acc, &y| (acc * y) as u32);
     }
 
     Ok(sum)
@@ -89,9 +103,11 @@ fn part1(schematic: &Vec<String>) -> Result<u32, Error> {
     let mut sum: u32 = 0;
 
     for ((line, start, end), num) in num_pos.iter() {
-        for row in line-1..line+2 { // need to check row above and below
-            for col in start-1..end+2 { // need to check column before and after number for symbols
-                if let Some(_) = sym_pos.get(&(row, col)) { 
+        for row in line - 1..line + 2 {
+            // need to check row above and below
+            for col in start - 1..end + 2 {
+                // need to check column before and after number for symbols
+                if let Some(_) = sym_pos.get(&(row, col)) {
                     // if there is a symbol directly above/below or diagonally adjacent to number
                     sum += *num;
                     break;

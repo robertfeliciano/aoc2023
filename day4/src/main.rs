@@ -1,18 +1,19 @@
-use std::{collections::HashSet, fs, io::Error};
+use std::{
+    collections::{HashMap, HashSet},
+    fs,
+    io::Error,
+};
 
-fn get_cards(input: &str) -> Vec<String> {
+fn get_cards(input: &str) -> Vec<(Vec<u8>, Vec<u8>)> {
     let myreader = fs::read_to_string(input).unwrap();
     let trimmed_lines: Vec<String> = myreader
         .lines()
         .map(|line| line.trim().to_string())
         .collect();
-    return trimmed_lines;
-}
 
-fn part1(cards: &Vec<String>) -> Result<u32, Error> {
-    let mut new_cards = Vec::new();
+    let mut new_cards: Vec<(Vec<u8>, Vec<u8>)> = Vec::new();
 
-    for card in cards {
+    for card in trimmed_lines {
         let new_card: &mut Vec<_> = &mut card[9..].split("|").collect();
         let winning: Vec<u8> = new_card[0]
             .to_string()
@@ -26,14 +27,17 @@ fn part1(cards: &Vec<String>) -> Result<u32, Error> {
             .collect();
         new_cards.push((winning, mine));
     }
+    return new_cards;
+}
 
+fn part1(new_cards: &Vec<(Vec<u8>, Vec<u8>)>) -> Result<u32, Error> {
     let mut points: u32 = 0;
     let base: u32 = 2;
 
     for (winning_numbers, my_numbers) in new_cards {
         let mut numbers: HashSet<u8> = HashSet::new();
         for num in winning_numbers {
-            numbers.insert(num);
+            numbers.insert(*num);
         }
         let mut same = 0;
         for num in my_numbers {
@@ -50,15 +54,37 @@ fn part1(cards: &Vec<String>) -> Result<u32, Error> {
     Ok(points)
 }
 
-fn part2(cards: &Vec<String>) -> Result<u16, Error> {
+fn part2(cards: &Vec<(Vec<u8>, Vec<u8>)>) -> Result<u32, Error> {
+    let mut line_no = 0;
 
-    
-    Ok(2)
+    let mut counts: Vec<u32> = vec![1; cards.len()];
+
+    for (winning_numbers, my_numbers) in cards {
+        let mut numbers: HashSet<u8> = HashSet::new();
+        for num in winning_numbers {
+            numbers.insert(*num);
+        }
+        let mut same = 0;
+        for num in my_numbers {
+            if numbers.contains(&num) {
+                same += 1;
+            }
+        }
+        for c in (line_no + 1)..(line_no + same + 1) {
+            counts[c] += 1 * counts[line_no];
+        }
+        line_no += 1;
+    }
+
+    let mut s = counts.iter().sum();
+
+    Ok(s)
 }
 
 fn main() {
     let cards = get_cards("src/input.txt");
     let p1 = part1(&cards);
     println!("{}", p1.unwrap());
-    part2(&cards);
+    let p2 = part2(&cards);
+    println!("{}", p2.unwrap());
 }

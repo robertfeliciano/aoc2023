@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     fs,
     io::Error,
 };
@@ -76,7 +76,7 @@ fn part2(cards: &Vec<(Vec<u8>, Vec<u8>)>) -> Result<u32, Error> {
         line_no += 1;
     }
 
-    let mut s = counts.iter().sum();
+    let s = counts.iter().sum();
 
     Ok(s)
 }
